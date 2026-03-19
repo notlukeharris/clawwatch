@@ -18,18 +18,35 @@ struct LogParser {
         "quota",
         "unhandled rejection",
         "uncaught exception",
-        "getUpdates conflict",
         "FATAL",
         "PANIC",
         "Error:",
     ]
 
+    /// Known-benign patterns that match errorPatterns but aren't real problems
+    static let ignoredPatterns: [String] = [
+        "getUpdates conflict",           // Normal Telegram long-poll reconnection
+        "Skipping skill path",           // Config warning, not an error
+    ]
+
     static func isErrorLine(_ line: String) -> Bool {
+        let trimmed = line.trimmingCharacters(in: .whitespaces)
+        if trimmed.isEmpty { return false }
+
         // Stack trace lines
-        if line.hasPrefix("    at ") {
+        if trimmed.hasPrefix("at ") {
             return true
         }
+
         let lower = line.lowercased()
+
+        // Check if it matches an ignored pattern first
+        for ignored in ignoredPatterns {
+            if lower.contains(ignored.lowercased()) {
+                return false
+            }
+        }
+
         for pattern in errorPatterns {
             if lower.contains(pattern.lowercased()) {
                 return true

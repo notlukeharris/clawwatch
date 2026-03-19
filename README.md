@@ -1,87 +1,49 @@
 # ClawWatch
 
-A native macOS menubar app (SwiftUI) that monitors your [OpenClaw](https://openclaw.ai) gateway status.
+A native macOS menubar app that monitors your [OpenClaw](https://github.com/openclaw/openclaw) gateway at a glance.
 
-## Features
+No browser tabs. No terminal windows. Just a colored dot in your menubar that tells you if your agents are running.
 
-- **Menubar icon** that changes color based on gateway health:
-  - 🟢 Green — gateway running, no issues
-  - 🟡 Yellow — gateway running but degraded (stale logs or recent errors)
-  - 🔴 Red — gateway process not running or unresponsive
-- **Polls every 15 seconds** (process check + WebSocket probe + log freshness)
-- **Agent list** — shows agents discovered from `~/.openclaw/agents/`
-- **Log access** — copy recent logs, error logs, or error context to clipboard
-- **Gateway control** — restart gateway with confirmation dialog
-- **Open Dashboard** — opens `http://127.0.0.1:18790/` in your browser
+![macOS 14+](https://img.shields.io/badge/macOS-14%2B-blue) ![Swift](https://img.shields.io/badge/Swift-5.9-orange) ![License](https://img.shields.io/badge/license-MIT-green)
 
-## Build
+## What It Does
 
-### Requirements
-- macOS 14+ (Sonoma)
-- Swift 5.9+ (comes with Xcode or via swift.org)
+**Menubar indicator:**
+- 🟢 **Green** — Gateway running, no issues
+- 🟡 **Yellow** — Gateway running but errors detected
+- 🔴 **Red** — Gateway is down or unresponsive
 
-### Debug build
+**Agent roster** — shows every agent in your `~/.openclaw/agents/` directory with live status:
+- 🔵 **Working** — actively processing (< 2 min ago)
+- 🟢 **Ready** — healthy, recently active (< 30 min)
+- ⚪ **Idle** — not currently in use, with time since last activity
+
+**Diagnostics (one click):**
+- **Copy Recent Logs** — last 200 lines of `gateway.log` → clipboard
+- **Copy Error Logs** — last 100 lines of `gateway.err.log` → clipboard
+- **Copy Error Context** — finds the last crash/error, grabs ±20 lines of surrounding context → clipboard (ready to paste into any LLM for diagnosis)
+
+**Actions:**
+- **Restart Gateway** — one click (with confirmation)
+- **Open Dashboard** — opens the gateway web UI
+
+## Install
+
+### Build from source
+
 ```bash
-swift build
-```
-
-### Release build
-```bash
+git clone https://github.com/openclaw/clawwatch.git
+cd clawwatch
 swift build -c release
 ```
 
-Binary will be at `.build/release/ClawWatch`.
+### Run
 
-## Installation
-
-### Option 1: Copy to /usr/local/bin (CLI-style)
 ```bash
-swift build -c release
-cp .build/release/ClawWatch /usr/local/bin/ClawWatch
-```
-Then launch it from Terminal:
-```bash
-ClawWatch &
+.build/release/ClawWatch &
 ```
 
-### Option 2: Create a .app bundle (recommended for menubar)
-```bash
-swift build -c release
-
-APP_DIR="$HOME/Applications/ClawWatch.app/Contents/MacOS"
-mkdir -p "$APP_DIR"
-cp .build/release/ClawWatch "$APP_DIR/"
-
-# Create Info.plist (sets LSUIElement for dock hiding)
-cat > "$HOME/Applications/ClawWatch.app/Contents/Info.plist" << 'EOF'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>CFBundleIdentifier</key>
-    <string>ai.openclaw.clawwatch</string>
-    <key>CFBundleName</key>
-    <string>ClawWatch</string>
-    <key>CFBundleExecutable</key>
-    <string>ClawWatch</string>
-    <key>CFBundleVersion</key>
-    <string>1.0.0</string>
-    <key>CFBundleShortVersionString</key>
-    <string>1.0.0</string>
-    <key>LSUIElement</key>
-    <true/>
-    <key>NSHighResolutionCapable</key>
-    <true/>
-    <key>LSMinimumSystemVersion</key>
-    <string>14.0</string>
-</dict>
-</plist>
-EOF
-
-open "$HOME/Applications/ClawWatch.app"
-```
-
-## Launch at Login (LaunchAgent)
+### Launch at login (optional)
 
 Create `~/Library/LaunchAgents/ai.openclaw.clawwatch.plist`:
 
@@ -94,58 +56,58 @@ Create `~/Library/LaunchAgents/ai.openclaw.clawwatch.plist`:
     <string>ai.openclaw.clawwatch</string>
     <key>ProgramArguments</key>
     <array>
-        <!-- Use the .app bundle path if you created one -->
-        <string>/Users/YOUR_USERNAME/Applications/ClawWatch.app/Contents/MacOS/ClawWatch</string>
+        <string>/usr/local/bin/ClawWatch</string>
     </array>
     <key>RunAtLoad</key>
     <true/>
     <key>KeepAlive</key>
     <false/>
-    <key>StandardOutPath</key>
-    <string>/tmp/clawwatch.log</string>
-    <key>StandardErrorPath</key>
-    <string>/tmp/clawwatch.err.log</string>
 </dict>
 </plist>
 ```
 
-Load it:
+Then:
 ```bash
+cp .build/release/ClawWatch /usr/local/bin/
 launchctl load ~/Library/LaunchAgents/ai.openclaw.clawwatch.plist
 ```
 
-Or add `ClawWatch.app` to **System Settings → General → Login Items**.
+## How It Works
 
-## Status Detection Logic
+ClawWatch polls every 15 seconds:
 
-1. **Process check** — `pgrep -f "openclaw.*gateway"` 
-2. **WebSocket probe** — connects to `ws://127.0.0.1:18790` (falls back to HTTP HEAD)
-3. **Log freshness** — checks `~/.openclaw/logs/gateway.log` mtime; yellow if >5 min stale
-4. **Error scan** — scans last 100 lines of `~/.openclaw/logs/gateway.err.log` for error patterns
+1. **Process check** — verifies the gateway process is alive via `pgrep`
+2. **Network probe** — connects to `ws://127.0.0.1:18790` to confirm the gateway is responsive
+3. **Log freshness** — checks `~/.openclaw/logs/gateway.log` modification time
+4. **Error scan** — parses recent `gateway.err.log` entries for crash patterns, connection failures, rate limits, and OOM errors
 
-### Error patterns detected
-`ECONNREFUSED`, `ECONNRESET`, `ETIMEDOUT`, `SIGTERM`, `SIGKILL`, `SIGSEGV`,
-`out of memory`, `OOM`, `heap out of memory`, `rate limit`, `429`, `quota`,
-`unhandled rejection`, `uncaught exception`, `getUpdates conflict`,
-`FATAL`, `PANIC`, `Error:`, stack trace lines (`    at ...`)
+Agent status is determined by reading `sessions.json` timestamps — no API calls, no LLM inference, just filesystem reads.
 
-## File Structure
+### Error Detection
 
-```
-ClawWatch/
-├── Package.swift
-├── Sources/
-│   └── ClawWatch/
-│       ├── ClawWatchApp.swift      # App entry, menubar setup, NSMenu building
-│       ├── StatusMonitor.swift      # Polling logic, process/WS/log checks
-│       ├── LogParser.swift          # Error pattern matching, log reading
-│       ├── AgentStatus.swift        # Agent discovery from ~/.openclaw/agents/
-│       └── ClipboardHelper.swift    # Copy-to-clipboard functions
-└── README.md
-```
+ClawWatch flags real problems and ignores normal operational noise:
 
-## Notes
+**Triggers yellow:**
+`ECONNREFUSED` · `ETIMEDOUT` · `SIGKILL` · `out of memory` · `rate limit` · `429` · `unhandled rejection` · `uncaught exception` · `FATAL` · stack traces
 
-- No code signing required for local use
-- `LSUIElement` is set via `NSApp.setActivationPolicy(.accessory)` at runtime (no dock icon)
-- When built as a `.app` bundle, the `Info.plist` in the bundle also sets `LSUIElement = true`
+**Ignored (benign):**
+`getUpdates conflict` (normal Telegram reconnection) · `Skipping skill path` (config warning)
+
+## Requirements
+
+- macOS 14 (Sonoma) or later
+- [OpenClaw](https://github.com/openclaw/openclaw) installed and configured
+- Swift 5.9+ toolchain (for building from source)
+
+## Configuration
+
+Currently reads from default OpenClaw paths:
+- Gateway: `ws://127.0.0.1:18790`
+- Logs: `~/.openclaw/logs/`
+- Agents: `~/.openclaw/agents/`
+
+Custom port/path configuration coming in a future release.
+
+## License
+
+MIT

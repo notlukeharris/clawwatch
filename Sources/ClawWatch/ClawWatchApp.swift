@@ -64,7 +64,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             m.addItem(emptyItem)
         } else {
             for agent in agents {
-                let item = NSMenuItem(title: "  \(agent.indicator) \(agent.name)", action: nil, keyEquivalent: "")
+                let detail = agent.detail.isEmpty ? "" : "  (\(agent.detail))"
+                let item = NSMenuItem(title: "  \(agent.indicator) \(agent.name)\(detail)", action: nil, keyEquivalent: "")
                 item.isEnabled = false
                 m.addItem(item)
             }
