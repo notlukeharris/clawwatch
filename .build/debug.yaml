@@ -1,0 +1,81 @@
+client:
+  name: basic
+  file-system: device-agnostic
+tools: {}
+targets:
+  "ClawWatch-arm64-apple-macosx15.0-debug.exe": ["<ClawWatch-arm64-apple-macosx15.0-debug.exe>"]
+  "ClawWatch-arm64-apple-macosx15.0-debug.module": ["<ClawWatch-arm64-apple-macosx15.0-debug.module>"]
+  "PackageStructure": ["<PackageStructure>"]
+  "main": ["<ClawWatch-arm64-apple-macosx15.0-debug.exe>","<ClawWatch-arm64-apple-macosx15.0-debug.module>"]
+  "test": ["<ClawWatch-arm64-apple-macosx15.0-debug.exe>","<ClawWatch-arm64-apple-macosx15.0-debug.module>"]
+default: "main"
+nodes:
+  "/Users/Shared/Developer/ClawWatch/Sources/ClawWatch/":
+    is-directory-structure: true
+    content-exclusion-patterns: [".git",".build"]
+  "/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch":
+    is-mutated: true
+commands:
+  "/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch-entitlement.plist":
+    tool: write-auxiliary-file
+    inputs: ["<entitlement-plist>","<com.apple.security.get-task-allow>"]
+    outputs: ["/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch-entitlement.plist"]
+    description: "Write auxiliary file /Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch-entitlement.plist"
+
+  "/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.build/sources":
+    tool: write-auxiliary-file
+    inputs: ["<sources-file-list>","/Users/Shared/Developer/ClawWatch/Sources/ClawWatch/AgentStatus.swift","/Users/Shared/Developer/ClawWatch/Sources/ClawWatch/ClawWatchApp.swift","/Users/Shared/Developer/ClawWatch/Sources/ClawWatch/ClipboardHelper.swift","/Users/Shared/Developer/ClawWatch/Sources/ClawWatch/LogParser.swift","/Users/Shared/Developer/ClawWatch/Sources/ClawWatch/StatusMonitor.swift"]
+    outputs: ["/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.build/sources"]
+    description: "Write auxiliary file /Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.build/sources"
+
+  "/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.product/Objects.LinkFileList":
+    tool: write-auxiliary-file
+    inputs: ["<link-file-list>","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.build/AgentStatus.swift.o","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.build/ClawWatchApp.swift.o","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.build/ClipboardHelper.swift.o","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.build/LogParser.swift.o","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.build/StatusMonitor.swift.o"]
+    outputs: ["/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.product/Objects.LinkFileList"]
+    description: "Write auxiliary file /Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.product/Objects.LinkFileList"
+
+  "/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt":
+    tool: write-auxiliary-file
+    inputs: ["<swift-get-version>","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"]
+    outputs: ["/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"]
+    always-out-of-date: "true"
+    description: "Write auxiliary file /Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+
+  "<ClawWatch-arm64-apple-macosx15.0-debug.exe>":
+    tool: phony
+    inputs: ["<ClawWatch-arm64-apple-macosx15.0-debug.exe-CodeSigning>"]
+    outputs: ["<ClawWatch-arm64-apple-macosx15.0-debug.exe>"]
+
+  "<ClawWatch-arm64-apple-macosx15.0-debug.module>":
+    tool: phony
+    inputs: ["/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.build/AgentStatus.swift.o","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.build/ClawWatchApp.swift.o","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.build/ClipboardHelper.swift.o","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.build/LogParser.swift.o","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.build/StatusMonitor.swift.o","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/Modules/ClawWatch.swiftmodule"]
+    outputs: ["<ClawWatch-arm64-apple-macosx15.0-debug.module>"]
+
+  "C.ClawWatch-arm64-apple-macosx15.0-debug.exe":
+    tool: shell
+    inputs: ["/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.build/AgentStatus.swift.o","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.build/ClawWatchApp.swift.o","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.build/ClipboardHelper.swift.o","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.build/LogParser.swift.o","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.build/StatusMonitor.swift.o","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.product/Objects.LinkFileList"]
+    outputs: ["/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch"]
+    description: "Linking ./.build/arm64-apple-macosx/debug/ClawWatch"
+    args: ["/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc","-L","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug","-o","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch","-module-name","ClawWatch","-Xlinker","-no_warn_duplicate_libraries","-emit-executable","-Xlinker","-alias","-Xlinker","_ClawWatch_main","-Xlinker","_main","-Xlinker","-rpath","-Xlinker","@loader_path","@/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.product/Objects.LinkFileList","-Xlinker","-rpath","-Xlinker","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift-6.2/macosx","-target","arm64-apple-macosx14.0","-Xlinker","-add_ast_path","-Xlinker","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/Modules/ClawWatch.swiftmodule","-plugin-path","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing","-sdk","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks","-I","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-L","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-g"]
+
+  "C.ClawWatch-arm64-apple-macosx15.0-debug.exe-entitlements":
+    tool: shell
+    inputs: ["/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch-entitlement.plist"]
+    outputs: ["<ClawWatch-arm64-apple-macosx15.0-debug.exe-CodeSigning>"]
+    description: "Applying debug entitlements to ./.build/arm64-apple-macosx/debug/ClawWatch"
+    args: ["codesign","--force","--sign","-","--entitlements","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch-entitlement.plist","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch"]
+
+  "C.ClawWatch-arm64-apple-macosx15.0-debug.module":
+    tool: shell
+    inputs: ["/Users/Shared/Developer/ClawWatch/Sources/ClawWatch/AgentStatus.swift","/Users/Shared/Developer/ClawWatch/Sources/ClawWatch/ClawWatchApp.swift","/Users/Shared/Developer/ClawWatch/Sources/ClawWatch/ClipboardHelper.swift","/Users/Shared/Developer/ClawWatch/Sources/ClawWatch/LogParser.swift","/Users/Shared/Developer/ClawWatch/Sources/ClawWatch/StatusMonitor.swift","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.build/sources"]
+    outputs: ["/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.build/AgentStatus.swift.o","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.build/ClawWatchApp.swift.o","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.build/ClipboardHelper.swift.o","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.build/LogParser.swift.o","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.build/StatusMonitor.swift.o","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/Modules/ClawWatch.swiftmodule"]
+    description: "Compiling Swift Module 'ClawWatch' (5 sources)"
+    args: ["/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc","-module-name","ClawWatch","-emit-dependencies","-emit-module","-emit-module-path","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/Modules/ClawWatch.swiftmodule","-output-file-map","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.build/output-file-map.json","-incremental","-c","@/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ClawWatch.build/sources","-I","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/Modules","-target","arm64-apple-macosx14.0","-incremental","-enable-batch-mode","-serialize-diagnostics","-index-store-path","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/index/store","-Onone","-enable-testing","-j14","-DSWIFT_PACKAGE","-DDEBUG","-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE","-module-cache-path","/Users/Shared/Developer/ClawWatch/.build/arm64-apple-macosx/debug/ModuleCache","-parseable-output","-Xfrontend","-entry-point-function-name","-Xfrontend","ClawWatch_main","-swift-version","5","-plugin-path","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing","-sdk","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks","-I","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-L","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-g","-Xcc","-isysroot","-Xcc","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk","-Xcc","-F","-Xcc","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-Xcc","-F","-Xcc","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks","-Xcc","-fPIC","-Xcc","-g","-package-name","clawwatch"]
+
+  "PackageStructure":
+    tool: package-structure-tool
+    inputs: ["/Users/Shared/Developer/ClawWatch/Sources/ClawWatch/","/Users/Shared/Developer/ClawWatch/Package.swift","/Users/Shared/Developer/ClawWatch/Package.resolved"]
+    outputs: ["<PackageStructure>"]
+    description: "Planning build"
+    allow-missing-inputs: true
+
