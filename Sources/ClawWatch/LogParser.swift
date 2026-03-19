@@ -125,4 +125,11 @@ struct LogParser {
         guard let lines = tailLines(from: errLogPath, count: count) else { return nil }
         return lines.joined(separator: "\n")
     }
+
+    // MARK: - Clear Errors
+    /// Truncates gateway.err.log to zero bytes
+    static func clearErrors() {
+        let errLogPath = NSString("~/.openclaw/logs/gateway.err.log").expandingTildeInPath
+        try? "".write(toFile: errLogPath, atomically: true, encoding: .utf8)
+    }
 }

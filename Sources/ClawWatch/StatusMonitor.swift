@@ -43,10 +43,10 @@ class StatusMonitor {
 
     private func determineState() -> GatewayState {
         let processRunning = checkProcess()
-        let wsAlive = checkWebSocket()
+        let httpAlive = checkHTTP()
 
-        // If neither process nor WS is alive, it's down
-        if !processRunning && !wsAlive {
+        // If neither process nor HTTP is alive, it's down
+        if !processRunning && !httpAlive {
             return .down
         }
 
@@ -78,50 +78,7 @@ class StatusMonitor {
         }
     }
 
-    // MARK: - WebSocket Probe
-    private func checkWebSocket() -> Bool {
-        var alive = false
-        let semaphore = DispatchSemaphore(value: 0)
-
-        guard let url = URL(string: "ws://127.0.0.1:18790") else {
-            return false
-        }
-
-        let request = URLRequest(url: url, timeoutInterval: 3.0)
-        var task: URLSessionWebSocketTask?
-        let session = URLSession(configuration: .ephemeral)
-        task = session.webSocketTask(with: request)
-        task?.resume()
-
-        // We just need to see if the connection establishes
-        task?.receive { result in
-            switch result {
-            case .success:
-                alive = true
-            case .failure(let err):
-                // ECONNREFUSED means server not there; other errors might mean it IS there but spoke first
-                let nsErr = err as NSError
-                // If we got a non-refused error, the port was at least open
-                if nsErr.code != NSURLErrorCannotConnectToHost &&
-                   nsErr.code != NSURLErrorNetworkConnectionLost {
-                    alive = true
-                }
-            }
-            semaphore.signal()
-        }
-
-        // Also try HTTP as fallback
-        let httpResult = semaphore.wait(timeout: .now() + 4.0)
-        task?.cancel(with: .goingAway, reason: nil)
-
-        if httpResult == .timedOut {
-            // If we timed out waiting for WS, try a quick HTTP check
-            return checkHTTP()
-        }
-
-        return alive || checkHTTP()
-    }
-
+    // MARK: - HTTP Health Check
     private func checkHTTP() -> Bool {
         guard let url = URL(string: "http://127.0.0.1:18790/") else { return false }
         var request = URLRequest(url: url, timeoutInterval: 3.0)

@@ -95,6 +95,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         copyCtxItem.target = self
         m.addItem(copyCtxItem)
 
+        // 9. Clear errors
+        let clearItem = NSMenuItem(title: "Clear Errors", action: #selector(clearErrors), keyEquivalent: "")
+        clearItem.target = self
+        m.addItem(clearItem)
+
         m.addItem(.separator())
 
         // 10. Restart Gateway
@@ -129,6 +134,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc func copyErrorContext() {
         ClipboardHelper.copyErrorContext()
+    }
+
+    @objc func clearErrors() {
+        LogParser.clearErrors()
+        statusMonitor?.checkStatus()
     }
 
     @objc func restartGateway() {
